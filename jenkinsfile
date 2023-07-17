@@ -1,52 +1,35 @@
 pipeline{
-	agent any
-	tools{
-		maven "test-maven"
-	}
-      stages{
-           stage('Checkout'){
-	    
-               steps{
-		 echo 'cloning..'
-                 git 'https://github.com/rajshekarc/car-api-project.git'
-              }
-          }
-          stage('Compile'){
-             
-              steps{
-                  echo 'compiling..'
-                  sh 'mvn compile'
-	      }
-          }
-          stage('CodeReview'){
-		  
-              steps{
-		    
-		  echo 'codeReview'
-                  sh 'mvn pmd:pmd'
-              }
-          }
-           stage('UnitTest'){
-		  
-              steps{
-	         
-                  sh 'mvn test'
-              }
-               post {
-               success {
-                   junit 'target/surefire-reports/*.xml'
-               }
-           }	
-          }
-          
-          stage('Package'){
-		  
-              steps{
-		  
-                  sh 'mvn package'
-              }
-          }
-	     
-          
-      }
+    agent any
+    tools{
+        maven "Qprofiles-maven"
+    }
+    stages{
+        stage("Fetch the data from github"){
+            steps{
+                git url: "https://github.com/rajshekarc/car-api-project.git"
+            }
+        }
+        stage("compile the ccode"){
+            steps{
+                sh 'mvn compile'
+            }
+        }
+        stage("Test the compiled code"){
+            steps{
+                sh 'mvn test'
+                echo 'To test the print'
+            }
+        }
+        stage("QA of the code"){
+            steps{
+                sh 'mvn pmd:pmd'
+                recordIssues(tools: [pmdParser()])
+            }
+        }
+        stage("Package the code"){
+            steps{
+                sh 'mvn package'
+            }
+        }
+    }
 }
